@@ -280,170 +280,167 @@
         <div class="spinner"></div>
         <p>Loading more news...</p>
     </div>
+<script>
+    const API_URL = '/api/top-headlines'; // Updated to use Netlify proxy
+    let currentPage = 1;
+    let currentCategory = 'general';
+    let isLoading = false;
+    let lastScrollPosition = 0;
+    let debounceTimer;
 
-    <script>
-        const API_KEY = '87c6f2d9b7ab49ef9b61dfb4560f9f22';
-        const API_URL = 'https://newsapi.org/v2/top-headlines';
-        let currentPage = 1;
-        let currentCategory = 'general';
-        let isLoading = false;
-        let lastScrollPosition = 0;
-        let debounceTimer;
+    // Show/hide spinner
+    function toggleSpinner(show) {
+        document.getElementById('mainSpinner').style.display = show ? 'block' : 'none';
+    }
 
-        // Show/hide spinner
-        function toggleSpinner(show) {
-            document.getElementById('mainSpinner').style.display = show ? 'block' : 'none';
-        }
+    // Show/hide loading more indicator
+    function toggleLoadingMore(show) {
+        document.getElementById('loadingMore').style.display = show ? 'block' : 'none';
+    }
 
-        // Show/hide loading more indicator
-        function toggleLoadingMore(show) {
-            document.getElementById('loadingMore').style.display = show ? 'block' : 'none';
-        }
-
-        // Fetch news with error handling
-        async function fetchNews(category = 'general', page = 1, search = '') {
-            try {
-                const params = new URLSearchParams({
-                    country: 'us',
-                    page,
-                    pageSize: 10,
-                    apiKey: API_KEY
-                });
-
-                if (category !== 'general') {
-                    params.append('category', category);
-                }
-                
-                if (search) {
-                    params.set('q', search);
-                    params.delete('country'); // Remove country restriction for search
-                }
-
-                const response = await fetch(`${API_URL}?${params}`);
-                if (!response.ok) throw new Error('Network response was not ok');
-                
-                const data = await response.json();
-                if (data.status === 'error') throw new Error(data.message);
-                
-                return data.articles;
-            } catch (error) {
-                console.error('Error fetching news:', error);
-                return [];
-            }
-        }
-
-        // Create news card
-        function createNewsCard(article) {
-            const date = new Date(article.publishedAt);
-            const formattedDate = date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+    // Fetch news with error handling
+    async function fetchNews(category = 'general', page = 1, search = '') {
+        try {
+            const params = new URLSearchParams({
+                country: 'us',
+                page,
+                pageSize: 10,
             });
 
-            return `
-                <article class="news-card">
-                    <img src="${article.urlToImage || '/api/placeholder/400/300'}" 
-                         alt="${article.title}" 
-                         class="news-image" 
-                         loading="lazy"
-                         onerror="this.src='/api/placeholder/400/300'">
-                    <div class="news-content">
-                        <div class="news-tags">
-                            <span class="tag">📅 ${formattedDate}</span>
-                            <span class="tag">📍 ${article.source.name}</span>
-                        </div>
-                        <h2 class="news-title">${article.title}</h2>
-                        <p class="news-excerpt">${article.description || 'Click to read more...'}</p>
-                    </div>
-                </article>
-            `;
-        }
-
-        // Load news with spinner
-        async function loadNews(category = 'general', page = 1, search = '', showSpinner = true) {
-            if (showSpinner) toggleSpinner(true);
-            
-            const articles = await fetchNews(category, page, search);
-            
-            if (page === 1) {
-                document.getElementById('newsContent').innerHTML = articles.map(createNewsCard).join('');
-            } else {
-                document.getElementById('newsContent').innerHTML += articles.map(createNewsCard).join('');
+            if (category !== 'general') {
+                params.append('category', category);
             }
-            
-            if (showSpinner) toggleSpinner(false);
-            return articles.length > 0;
-        }
 
-        // Handle category selection
-        document.querySelectorAll('.suggestion-tag').forEach(tag => {
-            tag.addEventListener('click', async () => {
-                document.querySelectorAll('.suggestion-tag').forEach(t => t.classList.remove('active'));
-                tag.classList.add('active');
-                
-                currentCategory = tag.dataset.category;
-                currentPage = 1;
-                await loadNews(currentCategory, currentPage);
-            });
+            if (search) {
+                params.set('q', search);
+                params.delete('country'); // Remove country restriction for search
+            }
+
+            const response = await fetch(`${API_URL}?${params}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const data = await response.json();
+            if (data.status === 'error') throw new Error(data.message);
+
+            return data.articles;
+        } catch (error) {
+            console.error('Error fetching news:', error);
+            return [];
+        }
+    }
+
+    // Create news card
+    function createNewsCard(article) {
+        const date = new Date(article.publishedAt);
+        const formattedDate = date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
         });
 
-        // Handle search
-        const searchInput = document.querySelector('.search-input');
-        const searchButton = document.querySelector('.search-button');
+        return `
+            <article class="news-card">
+                <img src="${article.urlToImage || '/api/placeholder/400/300'}" 
+                     alt="${article.title}" 
+                     class="news-image" 
+                     loading="lazy"
+                     onerror="this.src='/api/placeholder/400/300'">
+                <div class="news-content">
+                    <div class="news-tags">
+                        <span class="tag">📅 ${formattedDate}</span>
+                        <span class="tag">📍 ${article.source.name}</span>
+                    </div>
+                    <h2 class="news-title">${article.title}</h2>
+                    <p class="news-excerpt">${article.description || 'Click to read more...'}</p>
+                </div>
+            </article>
+        `;
+    }
 
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
+    // Load news with spinner
+    async function loadNews(category = 'general', page = 1, search = '', showSpinner = true) {
+        if (showSpinner) toggleSpinner(true);
+
+        const articles = await fetchNews(category, page, search);
+
+        if (page === 1) {
+            document.getElementById('newsContent').innerHTML = articles.map(createNewsCard).join('');
+        } else {
+            document.getElementById('newsContent').innerHTML += articles.map(createNewsCard).join('');
         }
 
-        const performSearch = debounce(async () => {
-            const query = searchInput.value.trim();
-            if (query) {
-                currentPage = 1;
-                await loadNews('general', 1, query);
+        if (showSpinner) toggleSpinner(false);
+        return articles.length > 0;
+    }
+
+    // Handle category selection
+    document.querySelectorAll('.suggestion-tag').forEach(tag => {
+        tag.addEventListener('click', async () => {
+            document.querySelectorAll('.suggestion-tag').forEach(t => t.classList.remove('active'));
+            tag.classList.add('active');
+
+            currentCategory = tag.dataset.category;
+            currentPage = 1;
+            await loadNews(currentCategory, currentPage);
+        });
+    });
+
+    // Handle search
+    const searchInput = document.querySelector('.search-input');
+    const searchButton = document.querySelector('.search-button');
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    const performSearch = debounce(async () => {
+        const query = searchInput.value.trim();
+        if (query) {
+            currentPage = 1;
+            await loadNews('general', 1, query);
+        }
+    }, 500);
+
+    searchInput.addEventListener('input', performSearch);
+    searchButton.addEventListener('click', performSearch);
+
+    // Infinite scroll with better performance
+    window.addEventListener('scroll', debounce(async () => {
+        const currentScroll = window.scrollY;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+
+        // Check if user has scrolled near bottom
+        if (currentScroll + windowHeight >= documentHeight - 500 && !isLoading) {
+            isLoading = true;
+            toggleLoadingMore(true);
+
+            currentPage++;
+            const hasMore = await loadNews(currentCategory, currentPage, searchInput.value.trim(), false);
+
+            toggleLoadingMore(false);
+            isLoading = false;
+
+            if (!hasMore) {
+                window.removeEventListener('scroll', this);
             }
-        }, 500);
+        }
 
-        searchInput.addEventListener('input', performSearch);
-        searchButton.addEventListener('click', performSearch);
+        lastScrollPosition = currentScroll;
+    }, 150));
 
-        // Infinite scroll with better performance
-        window.addEventListener('scroll', debounce(async () => {
-            const currentScroll = window.scrollY;
-            const windowHeight = window.innerHeight;
-            const documentHeight = document.documentElement.scrollHeight;
-            
-            // Check if user has scrolled near bottom
-            if (currentScroll + windowHeight >= documentHeight - 500 && !isLoading) {
-                isLoading = true;
-                toggleLoadingMore(true);
-                
-                currentPage++;
-                const hasMore = await loadNews(currentCategory, currentPage, searchInput.value.trim(), false);
-                
-                toggleLoadingMore(false);
-                isLoading = false;
-                
-                if (!hasMore) {
-                    window.removeEventListener('scroll', this);
-                }
-            }
-            
-            lastScrollPosition = currentScroll;
-        }, 150));
-
-        // Initial load
-        loadNews();
-    </script>
+    // Initial load
+    loadNews();
+</script>
 </body>
-</html> 
+</html>
