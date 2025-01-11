@@ -281,11 +281,38 @@
         <p>Loading more news...</p>
     </div>
 <script>
-    const API_URL = '/api/top-headlines'; // Updated to use Netlify proxy
+    const API_KEYS = [
+        "87c6f2d9b7ab49ef9b61dfb4560f9f22",
+        "6232da245ee84484ac43039ce3e22ea9",
+        "0c60f887c3af43249bc75c865c79a761",
+        "42f9e96446d14ff48235a9678102794f",
+        "b528fb6932ad4f95b1e54a2a200f1cd3",
+        "d447988e44594edf8c1b5f2652f2ed6d",
+        "f0b430af10eb480e87777182a9cbfc59",
+        "86ab5dcabce44d66b584167c6babb0cc",
+        "3822c5b96c18465ab198e8f052a1963b",
+        "be4fed0a47f84d168bb9558d5a8a7fc2",
+        "a606c85ebe95475286a4d096e5caf2da",
+        "066657212c3a4d32a409c3c300d3c434",
+        "24364484cfeb41d385eaa7c31e59560c",
+    ];
+
+    let currentKeyIndex = 0;
+
+    function getApiKey() {
+        return API_KEYS[currentKeyIndex];
+    }
+
+    function switchApiKey() {
+        currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+        console.warn(`Switching to API key: ${getApiKey()}`);
+    }
+
+    const API_URL = '/api/v2/top-headlines'; // Use relative URL for Netlify proxy
+
     let currentPage = 1;
     let currentCategory = 'general';
     let isLoading = false;
-    let lastScrollPosition = 0;
     let debounceTimer;
 
     // Show/hide spinner
@@ -298,10 +325,11 @@
         document.getElementById('loadingMore').style.display = show ? 'block' : 'none';
     }
 
-    // Fetch news with error handling
+    // Fetch news with API key cycling
     async function fetchNews(category = 'general', page = 1, search = '') {
         try {
             const params = new URLSearchParams({
+                apiKey: getApiKey(),
                 country: 'us',
                 page,
                 pageSize: 10,
@@ -317,6 +345,11 @@
             }
 
             const response = await fetch(`${API_URL}?${params}`);
+            if (response.status === 429) {
+                // If rate limit reached, switch API key and retry
+                switchApiKey();
+                return fetchNews(category, page, search);
+            }
             if (!response.ok) throw new Error('Network response was not ok');
 
             const data = await response.json();
@@ -435,12 +468,10 @@
                 window.removeEventListener('scroll', this);
             }
         }
-
-        lastScrollPosition = currentScroll;
     }, 150));
 
     // Initial load
     loadNews();
 </script>
 </body>
-</html>
+</html> 
