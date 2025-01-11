@@ -1,6 +1,6 @@
  [build]
-  command = "npm run build" # Adjust to your actual build command
-  publish = "dist" # Replace with your output folder if different (e.g., public, build)
+  command = "" # No build command needed
+  publish = "dist" # The folder containing your HTML, CSS, and JS files
 
 [[redirects]]
   from = "/api/*"
