@@ -1,6 +1,6 @@
  [build]
-  command = "" # No build command needed
-  publish = "dist" # The folder containing your HTML, CSS, and JS files
+  command = ""  # No build command needed for static files
+  publish = "."  # Point to the root directory
 
 [[redirects]]
   from = "/api/*"
