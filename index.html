@@ -281,197 +281,197 @@
         <p>Loading more news...</p>
     </div>
 <script>
-    const API_KEYS = [
-        "6232da245ee84484ac43039ce3e22ea9",
-        "0c60f887c3af43249bc75c865c79a761",
-        "42f9e96446d14ff48235a9678102794f",
-        "b528fb6932ad4f95b1e54a2a200f1cd3",
-        "d447988e44594edf8c1b5f2652f2ed6d",
-        "f0b430af10eb480e87777182a9cbfc59",
-        "86ab5dcabce44d66b584167c6babb0cc",
-        "3822c5b96c18465ab198e8f052a1963b",
-        "be4fed0a47f84d168bb9558d5a8a7fc2",
-        "a606c85ebe95475286a4d096e5caf2da",
-        "066657212c3a4d32a409c3c300d3c434",
-        "87c6f2d9b7ab49ef9b61dfb4560f9f22", 
-        "24364484cfeb41d385eaa7c31e59560c",
-    ];
+                  const API_KEYS = [
+    "87c6f2d9b7ab49ef9b61dfb4560f9f22",
+    "6232da245ee84484ac43039ce3e22ea9",
+    "0c60f887c3af43249bc75c865c79a761",
+    "42f9e96446d14ff48235a9678102794f",
+    "b528fb6932ad4f95b1e54a2a200f1cd3",
+    "d447988e44594edf8c1b5f2652f2ed6d",
+    "f0b430af10eb480e87777182a9cbfc59",
+    "86ab5dcabce44d66b584167c6babb0cc",
+    "3822c5b96c18465ab198e8f052a1963b",
+    "be4fed0a47f84d168bb9558d5a8a7fc2",
+    "a606c85ebe95475286a4d096e5caf2da",
+    "066657212c3a4d32a409c3c300d3c434",
+    "24364484cfeb41d385eaa7c31e59560c",
+];
 
-    let currentKeyIndex = 0;
+let currentKeyIndex = 0;
 
-    function getApiKey() {
-        return API_KEYS[currentKeyIndex];
-    }
+function getApiKey() {
+    return API_KEYS[currentKeyIndex];
+}
 
-    function switchApiKey() {
-        currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
-        console.warn(`Switching to API key: ${getApiKey()}`);
-    }
+function switchApiKey() {
+    currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+    console.warn(`Switching to API key: ${getApiKey()}`);
+}
 
-    const API_URL = '/api/v2/top-headlines'; // Use relative URL for Netlify proxy
+const API_URL = '/api'; // Use relative URL for Netlify proxy
 
-    let currentPage = 1;
-    let currentCategory = 'general';
-    let isLoading = false;
-    let debounceTimer;
+let currentPage = 1;
+let currentCategory = 'general';
+let isLoading = false;
+let debounceTimer;
 
-    // Show/hide spinner
-    function toggleSpinner(show) {
-        document.getElementById('mainSpinner').style.display = show ? 'block' : 'none';
-    }
+// Show/hide spinner
+function toggleSpinner(show) {
+    document.getElementById('mainSpinner').style.display = show ? 'block' : 'none';
+}
 
-    // Show/hide loading more indicator
-    function toggleLoadingMore(show) {
-        document.getElementById('loadingMore').style.display = show ? 'block' : 'none';
-    }
+// Show/hide loading more indicator
+function toggleLoadingMore(show) {
+    document.getElementById('loadingMore').style.display = show ? 'block' : 'none';
+}
 
-    // Fetch news with API key cycling
-    async function fetchNews(category = 'general', page = 1, search = '') {
-        try {
-            const params = new URLSearchParams({
-                apiKey: getApiKey(),
-                country: 'us',
-                page,
-                pageSize: 10,
-            });
-
-            if (category !== 'general') {
-                params.append('category', category);
-            }
-
-            if (search) {
-                params.set('q', search);
-                params.delete('country'); // Remove country restriction for search
-            }
-
-            const response = await fetch(`${API_URL}?${params}`);
-            if (response.status === 429) {
-                // If rate limit reached, switch API key and retry
-                switchApiKey();
-                return fetchNews(category, page, search);
-            }
-            if (!response.ok) throw new Error('Network response was not ok');
-
-            const data = await response.json();
-            if (data.status === 'error') throw new Error(data.message);
-
-            return data.articles;
-        } catch (error) {
-            console.error('Error fetching news:', error);
-            return [];
-        }
-    }
-
-    // Create news card
-    function createNewsCard(article) {
-        const date = new Date(article.publishedAt);
-        const formattedDate = date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+// Fetch news with API key cycling
+async function fetchNews(category = 'general', page = 1, search = '') {
+    try {
+        const params = new URLSearchParams({
+            apiKey: getApiKey(),
+            country: 'us',
+            page,
+            pageSize: 10,
         });
 
-        return `
-            <article class="news-card">
-                <img src="${article.urlToImage || '/api/placeholder/400/300'}" 
-                     alt="${article.title}" 
-                     class="news-image" 
-                     loading="lazy"
-                     onerror="this.src='/api/placeholder/400/300'">
-                <div class="news-content">
-                    <div class="news-tags">
-                        <span class="tag">📅 ${formattedDate}</span>
-                        <span class="tag">📍 ${article.source.name}</span>
-                    </div>
-                    <h2 class="news-title">${article.title}</h2>
-                    <p class="news-excerpt">${article.description || 'Click to read more...'}</p>
-                </div>
-            </article>
-        `;
-    }
-
-    // Load news with spinner
-    async function loadNews(category = 'general', page = 1, search = '', showSpinner = true) {
-        if (showSpinner) toggleSpinner(true);
-
-        const articles = await fetchNews(category, page, search);
-
-        if (page === 1) {
-            document.getElementById('newsContent').innerHTML = articles.map(createNewsCard).join('');
-        } else {
-            document.getElementById('newsContent').innerHTML += articles.map(createNewsCard).join('');
+        if (category !== 'general') {
+            params.append('category', category);
         }
 
-        if (showSpinner) toggleSpinner(false);
-        return articles.length > 0;
+        if (search) {
+            params.set('q', search);
+            params.delete('country'); // Remove country restriction for search
+        }
+
+        const response = await fetch(`${API_URL}?${params}`);
+        if (response.status === 429) {
+            // If rate limit reached, switch API key and retry
+            switchApiKey();
+            return fetchNews(category, page, search);
+        }
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+        if (data.status === 'error') throw new Error(data.message);
+
+        return data.articles;
+    } catch (error) {
+        console.error('Error fetching news:', error);
+        return [];
     }
+}
 
-    // Handle category selection
-    document.querySelectorAll('.suggestion-tag').forEach(tag => {
-        tag.addEventListener('click', async () => {
-            document.querySelectorAll('.suggestion-tag').forEach(t => t.classList.remove('active'));
-            tag.classList.add('active');
-
-            currentCategory = tag.dataset.category;
-            currentPage = 1;
-            await loadNews(currentCategory, currentPage);
-        });
+// Create news card
+function createNewsCard(article) {
+    const date = new Date(article.publishedAt);
+    const formattedDate = date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
     });
 
-    // Handle search
-    const searchInput = document.querySelector('.search-input');
-    const searchButton = document.querySelector('.search-button');
+    return `
+        <article class="news-card">
+            <img src="${article.urlToImage || '/api/placeholder/400/300'}" 
+                 alt="${article.title}" 
+                 class="news-image" 
+                 loading="lazy"
+                 onerror="this.src='/api/placeholder/400/300'">
+            <div class="news-content">
+                <div class="news-tags">
+                    <span class="tag">📅 ${formattedDate}</span>
+                    <span class="tag">📍 ${article.source.name}</span>
+                </div>
+                <h2 class="news-title">${article.title}</h2>
+                <p class="news-excerpt">${article.description || 'Click to read more...'}</p>
+            </div>
+        </article>
+    `;
+}
 
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+// Load news with spinner
+async function loadNews(category = 'general', page = 1, search = '', showSpinner = true) {
+    if (showSpinner) toggleSpinner(true);
+
+    const articles = await fetchNews(category, page, search);
+
+    if (page === 1) {
+        document.getElementById('newsContent').innerHTML = articles.map(createNewsCard).join('');
+    } else {
+        document.getElementById('newsContent').innerHTML += articles.map(createNewsCard).join('');
     }
 
-    const performSearch = debounce(async () => {
-        const query = searchInput.value.trim();
-        if (query) {
-            currentPage = 1;
-            await loadNews('general', 1, query);
+    if (showSpinner) toggleSpinner(false);
+    return articles.length > 0;
+}
+
+// Handle category selection
+document.querySelectorAll('.suggestion-tag').forEach(tag => {
+    tag.addEventListener('click', async () => {
+        document.querySelectorAll('.suggestion-tag').forEach(t => t.classList.remove('active'));
+        tag.classList.add('active');
+
+        currentCategory = tag.dataset.category;
+        currentPage = 1;
+        await loadNews(currentCategory, currentPage);
+    });
+});
+
+// Handle search
+const searchInput = document.querySelector('.search-input');
+const searchButton = document.querySelector('.search-button');
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+const performSearch = debounce(async () => {
+    const query = searchInput.value.trim();
+    if (query) {
+        currentPage = 1;
+        await loadNews('general', 1, query);
+    }
+}, 500);
+
+searchInput.addEventListener('input', performSearch);
+searchButton.addEventListener('click', performSearch);
+
+// Infinite scroll with better performance
+window.addEventListener('scroll', debounce(async () => {
+    const currentScroll = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+
+    // Check if user has scrolled near bottom
+    if (currentScroll + windowHeight >= documentHeight - 500 && !isLoading) {
+        isLoading = true;
+        toggleLoadingMore(true);
+
+        currentPage++;
+        const hasMore = await loadNews(currentCategory, currentPage, searchInput.value.trim(), false);
+
+        toggleLoadingMore(false);
+        isLoading = false;
+
+        if (!hasMore) {
+            window.removeEventListener('scroll', this);
         }
-    }, 500);
+    }
+}, 150));
 
-    searchInput.addEventListener('input', performSearch);
-    searchButton.addEventListener('click', performSearch);
-
-    // Infinite scroll with better performance
-    window.addEventListener('scroll', debounce(async () => {
-        const currentScroll = window.scrollY;
-        const windowHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-
-        // Check if user has scrolled near bottom
-        if (currentScroll + windowHeight >= documentHeight - 500 && !isLoading) {
-            isLoading = true;
-            toggleLoadingMore(true);
-
-            currentPage++;
-            const hasMore = await loadNews(currentCategory, currentPage, searchInput.value.trim(), false);
-
-            toggleLoadingMore(false);
-            isLoading = false;
-
-            if (!hasMore) {
-                window.removeEventListener('scroll', this);
-            }
-        }
-    }, 150));
-
-    // Initial load
-    loadNews();
+// Initial load
+loadNews();  
 </script>
 </body>
 </html> 
