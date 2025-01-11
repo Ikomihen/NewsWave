@@ -1,0 +1,5 @@
+ [[redirects]]
+  from = "/api/*"
+  to = "https://newsapi.org/v2/:splat"
+  status = 200
+  headers = { Authorization = "Bearer 87c6f2d9b7ab49ef9b61dfb4560f9f22" }
