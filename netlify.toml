@@ -1,11 +1,9 @@
-# File: netlify.toml
-
-[build]
-  publish = "dist" # Adjust this to the folder containing your static files
-  command = "npm run build" # Adjust based on your project setup
+ [build]
+  command = "npm run build" # Adjust to your actual build command
+  publish = "dist" # Replace with your output folder if different (e.g., public, build)
 
 [[redirects]]
   from = "/api/*"
-  to = "https://newsapi.org/:splat" # Redirect API requests to the NewsAPI server
+  to = "https://newsapi.org/v2/:splat"
   status = 200
   force = true
