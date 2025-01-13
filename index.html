@@ -324,12 +324,13 @@
         <p>Loading more news...</p>
     </div>
     
-    
     <script type="module">
+  // Import Firebase modules
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { doc, updateDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+  import { getFirestore, doc, updateDoc, getDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"; 
   import { getDatabase } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+  // Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyD0ohfy9u-CDt9K7ZDX-UUbzNCbCRhL7TY",
     authDomain: "credentials-a17e3.firebaseapp.com",
@@ -339,7 +340,11 @@
     appId: "1:968049262137:web:06929729e6c9ca91bcd7e8"
   };
 
+  // Initialize Firebase app
   const app = initializeApp(firebaseConfig);
+
+  // Initialize Firestore and Realtime Database
+  const db = getFirestore(app);
   const database = getDatabase(app);
 </script>
     
@@ -525,7 +530,7 @@ async function loadNews(category = 'general', page = 1, search = '', showSpinner
 
     // Attach event listeners to interactions for each article
     articles.forEach(article => {
-        const articleId = article.id;
+        const articleId = article.title.replace(/\s+/g, '-').toLowerCase();  // Use this same ID generated in the createNewsCard function
 
         // Like button event listener
         document.getElementById(`${articleId}-like`).addEventListener('click', () => handleLike(articleId));
@@ -534,10 +539,10 @@ async function loadNews(category = 'general', page = 1, search = '', showSpinner
         document.getElementById(`${articleId}-dislike`).addEventListener('click', () => handleDislike(articleId));
 
         // Rating button event listener
-        document.getElementById(`${articleId}-rating`).addEventListener('click', (event) => {
-            const ratingValue = event.target.value;  // Assuming the rating value is set on the button
-            handleRating(articleId, ratingValue);
-        });
+        document.getElementById(`${articleId}-rating`).addEventListener('change', (event) => {
+    const ratingValue = event.target.value;
+    handleRating(articleId, ratingValue);
+});
 
         // Comment submission event listener
         document.getElementById(`${articleId}-comment-submit`).addEventListener('click', () => {
@@ -639,7 +644,6 @@ window.addEventListener('scroll', debounce(async () => {
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
 
-    // Check if user has scrolled near bottom
     if (currentScroll + windowHeight >= documentHeight - 500 && !isLoading) {
         isLoading = true;
         toggleLoadingMore(true);
@@ -651,7 +655,8 @@ window.addEventListener('scroll', debounce(async () => {
         isLoading = false;
 
         if (!hasMore) {
-            window.removeEventListener('scroll', this);
+            // Keep this part to allow the infinite scroll to stop when no more articles are found
+            // window.removeEventListener('scroll', this); 
         }
     }
 }, 150));
