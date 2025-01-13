@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,7 @@
     <title>NEWS ARCHIVES</title>
     <style>
     
-    /* Reset and Base Variables */
+/* Reset and Base Variables */
 * {
     margin: 0;
     padding: 0;
@@ -221,7 +220,6 @@ body {
     margin-top: auto;
 }
 
-
 /* Loading States */
 .spinner-container {
   position: fixed;
@@ -235,6 +233,9 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  pointer-events: none; /* Prevent interaction with other elements */
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
 }
 
 .spinner {
@@ -246,12 +247,14 @@ body {
   animation: spin 1s linear infinite;
 }
 
-
-.loading-more {
-position: absolute;
-left: 70%;
-padding: 20px;
-display: none;
+/* Spinner Fade-in Animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* Spinner Animation */
@@ -264,6 +267,20 @@ display: none;
   }
 }
 
+/* Show the loading spinner when content is loading */
+.loading {
+  display: block;
+}
+
+.loading-more {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 20px;
+  display: block;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+}
 
 /* Animations */
 @keyframes spin {
@@ -283,7 +300,6 @@ display: none;
     
     .search-button {
         padding: 1.1rem 1.0rem;
-        
     }
     
     .suggestion-tag {
@@ -341,7 +357,6 @@ display: none;
         background: rgba(0, 0, 0, 0.8);
     }
 }
-    
     </style>
    
 </head>
@@ -636,3 +651,4 @@ preloadResource("script.js", "script");
 
 </body>
 </html> 
+ 
