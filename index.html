@@ -1,286 +1,188 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEWS ARCHIVES</title>
+    <title>News Hub</title>
     <style>
-    
-      * {
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu;
-        }
-
-        :root {
-            --primary: #1a73e8;
-            --text-primary: #333;
-            --background: #f5f5f5;
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto;
         }
 
         body {
-            background: var(--background);
+            background: #000000;
+            color: white;
             overflow-x: hidden;
-            overscroll-behavior-y: contain;
         }
 
-        /* Search Section */
-        .search-section {
+        .header {
+            background: #121212;
+            padding: 1rem;
             position: sticky;
             top: 0;
-            background: white;
-            padding: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             z-index: 100;
         }
 
-        .search-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .search-bar {
-            display: flex;
-            gap: 0.5rem;
+        .logo {
+            color: #f5c518;
+            font-weight: bold;
+            font-size: 2rem;
             margin-bottom: 1rem;
         }
 
-        .search-input {
-            flex: 1;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 24px;
-            font-size: 1rem;
-        }
-
-        .search-button {
-            padding: 0.4rem 0.3rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 24px;
-            cursor: pointer;
-        }
-
-        .suggestions {
-            display: flex;
-            gap: 0.5rem;
-            overflow-x: auto;
-            padding: 0.5rem 0;
-            scrollbar-width: none;
-        }
-
-        .suggestions::-webkit-scrollbar {
-            display: none;
-        }
-
-        .suggestion-tag {
-            padding: 0.5rem 1rem;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .suggestion-tag:hover {
-            background: #f0f0f0;
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 0.8rem;
-            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #666;
-            text-decoration: none;
-            font-size: 0.8rem;
-        }
-
-        .nav-item.active {
-            color: var(--primary);
-        }
-
-        /* News Content */
-        .main-content {
-            max-width: 800px;
-            margin: 1rem auto 5rem;
+        .popular-interests {
+            margin: 2rem 0;
             padding: 0 1rem;
         }
 
-        .news-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
+        .section-title {
+            color: #f5c518;
+            font-size: 1.5rem;
             margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .image-slider {
-            position: relative;
-            height: 200px;
-            overflow: hidden;
-        }
-
-        .slider-container {
             display: flex;
-            transition: transform 0.3s;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .news-card {
+            background: #1a1a1a;
+            border-radius: 9px;
+            overflow: hidden;
+            position: relative;
+            right: 20px;
         }
 
         .news-image {
             width: 100%;
-            min-width: 100%;
             height: 200px;
             object-fit: cover;
         }
 
-        .slider-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            padding: 1rem;
-            cursor: pointer;
-            z-index: 2;
-        }
-
-        .slider-prev { left: 0; }
-        .slider-next { right: 0; }
-
         .news-content {
-            padding: 1rem;
-        }
-
-        .news-tags {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .tag {
-            font-size: 0.8rem;
-            color: #666;
+            padding: 1.2rem;
+           
         }
 
         .news-title {
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .news-excerpt {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        /* Spinner */
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 2rem auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    
-    
-        /* ... Previous styles remain the same until spinner ... */
-        .spinner-container {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            display: none;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #1a73e8;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .loading-more {
-            text-align: center;
-            padding: 20px;
-            display: none;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Add smooth scroll behavior */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Style active suggestion tag */
-        .suggestion-tag.active {
-            background: #1a73e8;
             color: white;
+        }
+
+        .news-meta {
+            display: flex;
+            gap: 1rem;
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .search-bar {
+            background: #2b2b2b;
+            border-radius: 4px;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            color: white;
+            flex: 1;
+            padding: 0.5rem;
+        }
+
+        .search-button {
+            background: #f5c518;
+            color: black;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .category-tags {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+        }
+
+        .category-tag {
+            background: #2b2b2b;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .duration-badge {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(0,0,0,0.8);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <section class="search-section">
-        <div class="search-container">
-            <div class="search-bar">
-                <input type="text" class="search-input" placeholder="Search news...">   <button style="width:50px; height:50px;" class="search-button">Search</button>
+    <header class="header">
+        <div class="logo">NewsHub</div>
+        <div class="search-bar">
+            <input type="text" class="search-input" placeholder="Search news...">
+            <button class="search-button">Search</button>
+        </div>
+        <div class="category-tags">
+            <div class="category-tag">Breaking News</div>
+            <div class="category-tag">Politics</div>
+            <div class="category-tag">Technology</div>
+            <div class="category-tag">Business</div>
+            <div class="category-tag">Sports</div>
+        </div>
+    </header>
+
+    <section class="popular-interests">
+        <h2 class="section-title">Trending News</h2>
+        <div class="news-grid">
+            <div class="news-card">
+                <img src="/api/placeholder/400/320" alt="News 1" class="news-image">
+                <div class="duration-badge">5 min read</div>
+                <div class="news-content">
+                    <h3 class="news-title">Global Climate Summit Reaches Historic Agreement</h3>
+                    <div class="news-meta">
+                        <span>2 hours ago</span>
+                        <span>• World News</span>
+                    </div>
+                </div>
             </div>
-            <div class="suggestions">
-                <div class="suggestion-tag" data-category="general">Top Stories</div>
-                <div class="suggestion-tag" data-category="sports">Sports</div>
-                <div class="suggestion-tag" data-category="technology">Technology</div>
-                <div class="suggestion-tag" data-category="entertainment">Entertainment</div>
-                <div class="suggestion-tag" data-category="business">Business</div>
-                <div class="suggestion-tag" data-category="science">Science</div>
-                <div class="suggestion-tag" data-category="health">Health</div>
+            <div class="news-card">
+                <img src="/api/placeholder/400/320" alt="News 2" class="news-image">
+                <div class="duration-badge">3 min read</div>
+                <div class="news-content">
+                    <h3 class="news-title">Tech Giants Announce Revolutionary AI Development</h3>
+                    <div class="news-meta">
+                        <span>4 hours ago</span>
+                        <span>• Technology</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
-
-    <div class="spinner-container" id="mainSpinner">
-        <div class="spinner"></div>
-    </div>
-
-    <main class="main-content" id="newsContent">
-        <!-- News content will be loaded here -->
-    </main>
-
-    <div class="loading-more" id="loadingMore">
-        <div class="spinner"></div>
-        <p>Loading more news...</p>
-    </div>
+</body>
+</html>
 <script>
                   const API_KEYS = [
     "87c6f2d9b7ab49ef9b61dfb4560f9f22",
@@ -481,4 +383,4 @@ window.addEventListener('scroll', debounce(async () => {
 loadNews();  
 </script>
 </body>
-</html> 
+</html>  
