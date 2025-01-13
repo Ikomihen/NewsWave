@@ -3,223 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMDb Mobile</title>
+    <title>NEWS ARCHIVES</title>
     <style>
-        * {
+    
+      * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu;
         }
 
         :root {
-            --imdb-yellow: #F5C518;
-            --imdb-dark: #121212;
-            --imdb-gray: #757575;
+            --primary: #1a73e8;
+            --text-primary: #333;
+            --background: #f5f5f5;
         }
 
         body {
-            background-color: var(--imdb-dark);
-            color: white;
+            background: var(--background);
+            overflow-x: hidden;
+            overscroll-behavior-y: contain;
         }
 
-        .header {
+        /* Search Section */
+        .search-section {
             position: sticky;
             top: 0;
-            background-color: var(--imdb-dark);
-            padding: 0.5rem 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             z-index: 100;
         }
 
-        .logo {
-            background-color: var(--imdb-yellow);
-            color: black;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-weight: bold;
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        .header-actions {
+        .search-bar {
             display: flex;
-            gap: 1rem;
-            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
-        .search-icon, .menu-icon {
+        .search-input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            font-size: 1rem;
+        }
+
+        .search-button {
+            padding: 0.4rem 0.3rem;
+            background: var(--primary);
             color: white;
-            font-size: 1.5rem;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
         }
 
-        .use-app-btn {
-            background-color: var(--imdb-yellow);
-            color: black;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .section-title {
-            padding: 1rem;
-            font-size: 1.5rem;
-            font-weight: 600;
-            border-left: 4px solid var(--imdb-yellow);
-            margin: 1rem 0;
-        }
-
-        .content-scroll {
+        .suggestions {
             display: flex;
+            gap: 0.5rem;
             overflow-x: auto;
-            gap: 1rem;
-            padding: 0 1rem;
+            padding: 0.5rem 0;
             scrollbar-width: none;
         }
 
-        .content-scroll::-webkit-scrollbar {
+        .suggestions::-webkit-scrollbar {
             display: none;
         }
 
-        .movie-card {
-            position: relative;
-            min-width: 280px;
-            height: 160px;
-            background-color: #1a1a1a;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s ease;
+        .suggestion-tag {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background 0.3s;
         }
 
-        .movie-card img {
+        .suggestion-tag:hover {
+            background: #f0f0f0;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
             width: 100%;
-            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.8rem;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        /* News Content */
+        .main-content {
+            max-width: 800px;
+            margin: 1rem auto 5rem;
+            padding: 0 1rem;
+        }
+
+        .news-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .image-slider {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .slider-container {
+            display: flex;
+            transition: transform 0.3s;
+        }
+
+        .news-image {
+            width: 100%;
+            min-width: 100%;
+            height: 200px;
             object-fit: cover;
         }
 
-        .movie-card:hover {
-            transform: scale(1.02);
-        }
-
-        .category-label {
+        .slider-button {
             position: absolute;
-            bottom: 1rem;
-            left: 1rem;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 1rem;
+            cursor: pointer;
+            z-index: 2;
         }
 
-        .video-preview {
-            position: relative;
-            margin: 1rem;
-            border-radius: 8px;
-            overflow: hidden;
+        .slider-prev { left: 0; }
+        .slider-next { right: 0; }
+
+        .news-content {
+            padding: 1rem;
         }
 
-        .video-preview img {
-            width: 100%;
-            border-radius: 8px;
-        }
-
-        .video-duration {
-            position: absolute;
-            bottom: 1rem;
-            left: 1rem;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-        }
-
-        .engagement {
+        .news-tags {
             display: flex;
-            gap: 1rem;
-            padding: 0.5rem 1rem;
-        }
-
-        .engagement span {
-            display: flex;
-            align-items: center;
             gap: 0.5rem;
-            color: var(--imdb-gray);
-        }
-
-        .news-caption {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            color: var(--imdb-gray);
-            line-height: 1.4;
-        }
-
-        .news-headline {
-            font-size: 1.2rem;
-            font-weight: 600;
-            padding: 0 1rem;
             margin-bottom: 0.5rem;
         }
 
+        .tag {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .news-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .news-excerpt {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    
+    
+        /* ... Previous styles remain the same until spinner ... */
+        .spinner-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-more {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Add smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Style active suggestion tag */
+        .suggestion-tag.active {
+            background: #1a73e8;
+            color: white;
+        }
     </style>
+    
+    <style>
+      .news-interactions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.news-interactions button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.news-interactions button:hover {
+    background-color: #0056b3;
+}
+
+.rating {
+    margin-top: 10px;
+}
+
+.comments-section {
+    margin-top: 10px;
+}
+
+.comment-input {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+#newsContent ul {
+    list-style: none;
+    padding: 0;
+}
+    </style>
+    
+    
 </head>
 <body>
-    <header class="header">
-        <div class="logo">IMDb</div>
-        <div class="header-actions">
-            <span class="search-icon">🔍</span>
-            <a href="#" class="use-app-btn">Use app</a>
-        </div>
-    </header>
-
-    <section>
-        <h2 class="section-title">Top Entertainment News</h2>
-        <div class="content-scroll">
-            <div class="movie-card">
-                <img src="/api/placeholder/280/160" alt="Breaking Entertainment News">
-                <div class="category-label">Hollywood Updates</div>
+    <section class="search-section">
+        <div class="search-container">
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Search news...">   <button style="width:50px; height:50px;" class="search-button">Search</button>
             </div>
-            <div class="movie-card">
-                <img src="/api/placeholder/280/160" alt="Industry Insights">
-                <div class="category-label">Industry News</div>
+            <div class="suggestions">
+                <div class="suggestion-tag" data-category="general">Top Stories</div>
+                <div class="suggestion-tag" data-category="sports">Sports</div>
+                <div class="suggestion-tag" data-category="technology">Technology</div>
+                <div class="suggestion-tag" data-category="entertainment">Entertainment</div>
+                <div class="suggestion-tag" data-category="business">Business</div>
+                <div class="suggestion-tag" data-category="science">Science</div>
+                <div class="suggestion-tag" data-category="health">Health</div>
             </div>
         </div>
     </section>
 
-    <section>
-        <h2 class="section-title">Latest Interviews</h2>
-        <div class="video-preview">
-            <img src="/api/placeholder/800/400" alt="Celebrity Interview">
-            <div class="video-duration">3:57</div>
-        </div>
-        <h3 class="news-headline">Exclusive: Behind the Scenes with Stars</h3>
-        <p class="news-caption">Watch our in-depth conversation about upcoming projects and industry insights</p>
-        <div class="engagement">
-            <span>👍 127</span>
-            <span>❤️ 42</span>
-        </div>
-    </section>
+    <div class="spinner-container" id="mainSpinner">
+        <div class="spinner"></div>
+    </div>
 
-    <section>
-        <h2 class="section-title">Trending Stories</h2>
-        <div class="content-scroll">
-            <div class="movie-card">
-                <img src="/api/placeholder/280/160" alt="Latest Stories">
-                <div class="category-label">Breaking News</div>
-            </div>
-            <div class="movie-card">
-                <img src="/api/placeholder/280/160" alt="Industry Analysis">
-                <div class="category-label">Analysis</div>
-            </div>
-            <div class="movie-card">
-                <img src="/api/placeholder/280/160" alt="Special Reports">
-                <div class="category-label">Special Report</div>
-            </div>
-        </div>
-    </section>
+    <main class="main-content" id="newsContent">
+        <!-- News content will be loaded here -->
+    </main>
 
+    <div class="loading-more" id="loadingMore">
+        <div class="spinner"></div>
+        <p>Loading more news...</p>
+    </div>
+    
+    <script type="module">
+  // Import Firebase modules
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getFirestore, doc, updateDoc, getDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"; 
+  import { getDatabase } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyD0ohfy9u-CDt9K7ZDX-UUbzNCbCRhL7TY",
+    authDomain: "credentials-a17e3.firebaseapp.com",
+    projectId: "credentials-a17e3",
+    storageBucket: "credentials-a17e3.appspot.com",
+    messagingSenderId: "968049262137",
+    appId: "1:968049262137:web:06929729e6c9ca91bcd7e8"
+  };
+
+  // Initialize Firebase app
+  
+const app = initializeApp(firebaseConfig);
+console.log("Firebase initialized:", app); // Debugging line
+  // Initialize Firestore and Realtime Database
+  const db = getFirestore(app);
+  const database = getDatabase(app);
+</script>
+    
+    
+    
 <script>
-                  const API_KEYS = [
+  
+const API_KEYS = [
     "87c6f2d9b7ab49ef9b61dfb4560f9f22",
    "7798a682736141879954243bac5021a5", 
 "f6795fcb818d4e8ea562013ccb6b12e9", 
@@ -307,62 +441,172 @@ async function fetchNews(category = 'general', page = 1, search = '') {
 }
 
 // Create news card
-function createNewsCard(article) {
-    const date = new Date(article.publishedAt);
-    const formattedDate = date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-
-    return `
-        <article class="news-card">
-            <img src="${article.urlToImage || '/api/placeholder/400/300'}" 
-                 alt="${article.title}" 
-                 class="news-image" 
-                 loading="lazy"
-                 onerror="this.src='/api/placeholder/400/300'">
-            <div class="news-content">
-                <div class="news-tags">
-                    <span class="tag">📅 ${formattedDate}</span>
-                    <span class="tag">📍 ${article.source.name}</span>
-                </div>
-                <h2 class="news-title">${article.title}</h2>
-                <p class="news-excerpt">${article.description || 'Click to read more...'}</p>
-            </div>
-        </article>
-    `;
-}
+  function createNewsCard(article) {
+      const articleId = article.title.replace(/\s+/g, '-').toLowerCase(); // Generate unique ID for each article
+      const date = new Date(article.publishedAt);
+      const formattedDate = date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+      });
+  
+      // Initialize article stats in Firebase if not already done
+      const articleRef = doc(db, "articles", articleId);
+      getDoc(articleRef).then((docSnapshot) => {
+          if (!docSnapshot.exists()) {
+              setDoc(articleRef, {
+                  likes: 0,
+                  dislikes: 0,
+                  views: 0,
+                  comments: [],
+                  ratings: 0,
+                  ratingCount: 0,
+              });
+          }
+      });
+  
+      return `
+          <article class="news-card" id="${articleId}">
+              <img src="${article.urlToImage || '/api/placeholder/400/300'}" 
+                   alt="${article.title}" 
+                   class="news-image" 
+                   loading="lazy"
+                   onerror="this.src='/api/placeholder/400/300'">
+              <div class="news-content">
+                  <div class="news-tags">
+                      <span class="tag">📅 ${formattedDate}</span>
+                      <span class="tag">📍 ${article.source.name}</span>
+                  </div>
+                  <h2 class="news-title">${article.title}</h2>
+                  <p class="news-excerpt">${article.description || 'Click to read more...'}</p>
+                  
+                  <!-- Interaction Buttons -->
+                  <div class="news-interactions">
+                      <button class="like-button" onclick="handleLike('${articleId}')">👍 <span id="${articleId}-likes">0</span></button>
+                      <button class="dislike-button" onclick="handleDislike('${articleId}')">👎 <span id="${articleId}-dislikes">0</span></button>
+                      <span>👁️ <span id="${articleId}-views">0</span></span>
+                  </div>
+                  
+                  <!-- Rating -->
+                  <div class="rating">
+                      <label for="rating-${articleId}">Rate:</label>
+                      <input type="number" id="rating-${articleId}" min="1" max="5" onchange="handleRating('${articleId}', this.value)">
+                      <span>Average: <span id="${articleId}-avg-rating">0</span></span>
+                  </div>
+  
+                  <!-- Comments -->
+                  <div class="comments-section">
+                      <input type="text" class="comment-input" placeholder="Add a comment..." 
+                          onkeypress="if(event.key === 'Enter') handleComment('${articleId}', this.value)">
+                      <ul id="${articleId}-comments"></ul>
+                  </div>
+              </div>
+          </article>
+      `;
+  }
 
 // Load news with spinner
+
+
+
+// Function to load news articles and handle interactions
 async function loadNews(category = 'general', page = 1, search = '', showSpinner = true) {
     if (showSpinner) toggleSpinner(true);
 
     const articles = await fetchNews(category, page, search);
 
+    const newsContentElement = document.getElementById('newsContent');
+
     if (page === 1) {
-        document.getElementById('newsContent').innerHTML = articles.map(createNewsCard).join('');
+        newsContentElement.innerHTML = articles.map(createNewsCard).join('');
     } else {
-        document.getElementById('newsContent').innerHTML += articles.map(createNewsCard).join('');
+        newsContentElement.innerHTML += articles.map(createNewsCard).join('');
     }
+
+    // Attach event listeners to interactions for each article
+    articles.forEach(article => {
+        const articleId = article.title.replace(/\s+/g, '-').toLowerCase();  // Use this same ID generated in the createNewsCard function
+
+        // Like button event listener
+        document.getElementById(`${articleId}-like`).addEventListener('click', () => handleLike(articleId));
+
+        // Dislike button event listener
+        document.getElementById(`${articleId}-dislike`).addEventListener('click', () => handleDislike(articleId));
+
+        // Rating button event listener
+        document.getElementById(`${articleId}-rating`).addEventListener('change', (event) => {
+    const ratingValue = event.target.value;
+    handleRating(articleId, ratingValue);
+});
+
+        // Comment submission event listener
+        document.getElementById(`${articleId}-comment-submit`).addEventListener('click', () => {
+            const comment = document.getElementById(`${articleId}-comment-input`).value;
+            handleComment(articleId, comment);
+        });
+    });
 
     if (showSpinner) toggleSpinner(false);
     return articles.length > 0;
 }
 
-// Handle category selection
+// Function to handle category selection
 document.querySelectorAll('.suggestion-tag').forEach(tag => {
     tag.addEventListener('click', async () => {
         document.querySelectorAll('.suggestion-tag').forEach(t => t.classList.remove('active'));
         tag.classList.add('active');
 
-        currentCategory = tag.dataset.category;
-        currentPage = 1;
+        const currentCategory = tag.dataset.category;
+        currentPage = 1;  // Reset page to 1 when a new category is selected
         await loadNews(currentCategory, currentPage);
     });
 });
+
+// Like interaction function
+async function handleLike(articleId) {
+    const articleRef = doc(db, "articles", articleId);
+    await updateDoc(articleRef, { likes: increment(1) });
+    updateUI(articleId, 'likes');
+}
+
+// Dislike interaction function
+async function handleDislike(articleId) {
+    const articleRef = doc(db, "articles", articleId);
+    await updateDoc(articleRef, { dislikes: increment(1) });
+    updateUI(articleId, 'dislikes');
+}
+
+// Rating interaction function
+async function handleRating(articleId, value) {
+    const articleRef = doc(db, "articles", articleId);
+    const articleSnapshot = await getDoc(articleRef);
+    const { ratings, ratingCount } = articleSnapshot.data();
+    const newRatings = ratings + parseInt(value);
+    const newRatingCount = ratingCount + 1;
+    await updateDoc(articleRef, {
+        ratings: newRatings,
+        ratingCount: newRatingCount,
+    });
+    const avgRating = (newRatings / newRatingCount).toFixed(1);
+    document.getElementById(`${articleId}-avg-rating`).textContent = avgRating;
+}
+
+// Comment submission function
+async function handleComment(articleId, comment) {
+    const articleRef = doc(db, "articles", articleId);
+    await updateDoc(articleRef, { comments: increment(1) });
+    const commentList = document.getElementById(`${articleId}-comments`);
+    commentList.innerHTML += `<li>${comment}</li>`;
+}
+
+// Update UI with Firebase data
+async function updateUI(articleId, field) {
+    const articleRef = doc(db, "articles", articleId);
+    const articleSnapshot = await getDoc(articleRef);
+    document.getElementById(`${articleId}-${field}`).textContent = articleSnapshot.data()[field];
+}
 
 // Handle search
 const searchInput = document.querySelector('.search-input');
@@ -397,7 +641,6 @@ window.addEventListener('scroll', debounce(async () => {
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
 
-    // Check if user has scrolled near bottom
     if (currentScroll + windowHeight >= documentHeight - 500 && !isLoading) {
         isLoading = true;
         toggleLoadingMore(true);
@@ -409,7 +652,8 @@ window.addEventListener('scroll', debounce(async () => {
         isLoading = false;
 
         if (!hasMore) {
-            window.removeEventListener('scroll', this);
+            // Keep this part to allow the infinite scroll to stop when no more articles are found
+            // window.removeEventListener('scroll', this); 
         }
     }
 }, 150));
