@@ -3,284 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEWS ARCHIVES</title>
+    <title>IMDb Mobile</title>
     <style>
-    
-      * {
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         :root {
-            --primary: #1a73e8;
-            --text-primary: #333;
-            --background: #f5f5f5;
+            --imdb-yellow: #F5C518;
+            --imdb-dark: #121212;
+            --imdb-gray: #757575;
         }
 
         body {
-            background: var(--background);
-            overflow-x: hidden;
-            overscroll-behavior-y: contain;
+            background-color: var(--imdb-dark);
+            color: white;
         }
 
-        /* Search Section */
-        .search-section {
+        .header {
             position: sticky;
             top: 0;
-            background: white;
-            padding: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: var(--imdb-dark);
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 100;
         }
 
-        .search-container {
-            max-width: 800px;
-            margin: 0 auto;
+        .logo {
+            background-color: var(--imdb-yellow);
+            color: black;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
         }
 
-        .search-bar {
+        .header-actions {
             display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            gap: 1rem;
+            align-items: center;
         }
 
-        .search-input {
-            flex: 1;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 24px;
-            font-size: 1rem;
-        }
-
-        .search-button {
-            padding: 0.4rem 0.3rem;
-            background: var(--primary);
+        .search-icon, .menu-icon {
             color: white;
-            border: none;
-            border-radius: 24px;
-            cursor: pointer;
+            font-size: 1.5rem;
         }
 
-        .suggestions {
+        .use-app-btn {
+            background-color: var(--imdb-yellow);
+            color: black;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .section-title {
+            padding: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-left: 4px solid var(--imdb-yellow);
+            margin: 1rem 0;
+        }
+
+        .content-scroll {
             display: flex;
-            gap: 0.5rem;
             overflow-x: auto;
-            padding: 0.5rem 0;
+            gap: 1rem;
+            padding: 0 1rem;
             scrollbar-width: none;
         }
 
-        .suggestions::-webkit-scrollbar {
+        .content-scroll::-webkit-scrollbar {
             display: none;
         }
 
-        .suggestion-tag {
-            padding: 0.5rem 1rem;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .suggestion-tag:hover {
-            background: #f0f0f0;
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 0.8rem;
-            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #666;
-            text-decoration: none;
-            font-size: 0.8rem;
-        }
-
-        .nav-item.active {
-            color: var(--primary);
-        }
-
-        /* News Content */
-        .main-content {
-            max-width: 800px;
-            margin: 1rem auto 5rem;
-            padding: 0 1rem;
-        }
-
-        .news-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .image-slider {
+        .movie-card {
             position: relative;
-            height: 200px;
+            min-width: 280px;
+            height: 160px;
+            background-color: #1a1a1a;
+            border-radius: 8px;
             overflow: hidden;
+            transition: transform 0.3s ease;
         }
 
-        .slider-container {
-            display: flex;
-            transition: transform 0.3s;
-        }
-
-        .news-image {
+        .movie-card img {
             width: 100%;
-            min-width: 100%;
-            height: 200px;
+            height: 100%;
             object-fit: cover;
         }
 
-        .slider-button {
+        .movie-card:hover {
+            transform: scale(1.02);
+        }
+
+        .category-label {
             position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            padding: 1rem;
-            cursor: pointer;
-            z-index: 2;
-        }
-
-        .slider-prev { left: 0; }
-        .slider-next { right: 0; }
-
-        .news-content {
-            padding: 1rem;
-        }
-
-        .news-tags {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .tag {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        .news-title {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .news-excerpt {
-            color: #666;
+            bottom: 1rem;
+            left: 1rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
             font-size: 0.9rem;
         }
 
-        /* Spinner */
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 2rem auto;
+        .video-preview {
+            position: relative;
+            margin: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    
-    
-        /* ... Previous styles remain the same until spinner ... */
-        .spinner-container {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            display: none;
+        .video-preview img {
+            width: 100%;
+            border-radius: 8px;
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #1a73e8;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .video-duration {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
         }
 
-        .loading-more {
-            text-align: center;
-            padding: 20px;
-            display: none;
+        .engagement {
+            display: flex;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .engagement span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--imdb-gray);
         }
 
-        /* Add smooth scroll behavior */
-        html {
-            scroll-behavior: smooth;
+        .news-caption {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            color: var(--imdb-gray);
+            line-height: 1.4;
         }
 
-        /* Style active suggestion tag */
-        .suggestion-tag.active {
-            background: #1a73e8;
-            color: white;
+        .news-headline {
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 0 1rem;
+            margin-bottom: 0.5rem;
         }
+
     </style>
 </head>
 <body>
-    <section class="search-section">
-        <div class="search-container">
-            <div class="search-bar">
-                <input type="text" class="search-input" placeholder="Search news...">   <button style="width:50px; height:50px;" class="search-button">Search</button>
+    <header class="header">
+        <div class="logo">IMDb</div>
+        <div class="header-actions">
+            <span class="search-icon">🔍</span>
+            <a href="#" class="use-app-btn">Use app</a>
+        </div>
+    </header>
+
+    <section>
+        <h2 class="section-title">Top Entertainment News</h2>
+        <div class="content-scroll">
+            <div class="movie-card">
+                <img src="/api/placeholder/280/160" alt="Breaking Entertainment News">
+                <div class="category-label">Hollywood Updates</div>
             </div>
-            <div class="suggestions">
-                <div class="suggestion-tag" data-category="general">Top Stories</div>
-                <div class="suggestion-tag" data-category="sports">Sports</div>
-                <div class="suggestion-tag" data-category="technology">Technology</div>
-                <div class="suggestion-tag" data-category="entertainment">Entertainment</div>
-                <div class="suggestion-tag" data-category="business">Business</div>
-                <div class="suggestion-tag" data-category="science">Science</div>
-                <div class="suggestion-tag" data-category="health">Health</div>
+            <div class="movie-card">
+                <img src="/api/placeholder/280/160" alt="Industry Insights">
+                <div class="category-label">Industry News</div>
             </div>
         </div>
     </section>
 
-    <div class="spinner-container" id="mainSpinner">
-        <div class="spinner"></div>
-    </div>
+    <section>
+        <h2 class="section-title">Latest Interviews</h2>
+        <div class="video-preview">
+            <img src="/api/placeholder/800/400" alt="Celebrity Interview">
+            <div class="video-duration">3:57</div>
+        </div>
+        <h3 class="news-headline">Exclusive: Behind the Scenes with Stars</h3>
+        <p class="news-caption">Watch our in-depth conversation about upcoming projects and industry insights</p>
+        <div class="engagement">
+            <span>👍 127</span>
+            <span>❤️ 42</span>
+        </div>
+    </section>
 
-    <main class="main-content" id="newsContent">
-        <!-- News content will be loaded here -->
-    </main>
+    <section>
+        <h2 class="section-title">Trending Stories</h2>
+        <div class="content-scroll">
+            <div class="movie-card">
+                <img src="/api/placeholder/280/160" alt="Latest Stories">
+                <div class="category-label">Breaking News</div>
+            </div>
+            <div class="movie-card">
+                <img src="/api/placeholder/280/160" alt="Industry Analysis">
+                <div class="category-label">Analysis</div>
+            </div>
+            <div class="movie-card">
+                <img src="/api/placeholder/280/160" alt="Special Reports">
+                <div class="category-label">Special Report</div>
+            </div>
+        </div>
+    </section>
 
-    <div class="loading-more" id="loadingMore">
-        <div class="spinner"></div>
-        <p>Loading more news...</p>
-    </div>
 <script>
                   const API_KEYS = [
     "87c6f2d9b7ab49ef9b61dfb4560f9f22",
