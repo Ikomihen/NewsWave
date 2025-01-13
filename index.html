@@ -246,11 +246,13 @@ body {
 }
 
 
-        .loading-more {
-            text-align: center;
-            padding: 20px;
-            display: none;
-        }
+.loading-more {
+position: absolute;
+left: 50%;
+transform: translateX(-50%);
+padding: 20px;
+display: none;
+}
 
 /* Spinner Animation */
 @keyframes spin {
@@ -582,10 +584,12 @@ window.addEventListener('scroll', debounce(async () => {
 // Initial load
 loadNews();  
 </script>
+
+
  <script>
       // 1. Lazy Loading Images (No change in src, works with existing structure)
 document.addEventListener("DOMContentLoaded", () => {
-  const images = document.querySelectorAll("img"); // Select all images on the page
+  const images = document.querySelectorAll('img'); // Select all images on the page
 
   const observer = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
@@ -602,18 +606,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// 2. Debounced Search Input
-
- debounce = (callback, delay) => {
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(callback, delay);
-};
-
-document.getElementById("searchInput").addEventListener("input", (e) => {
-  debounce(() => {
-    performSearch(e.target.value); // Call your search function
-  }, 300); // 300ms delay for search input
-});
 
 
 
@@ -624,16 +616,7 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// 4. Asynchronous Script Loading (Ensures non-blocking loading of scripts)
-document.addEventListener("DOMContentLoaded", () => {
-  const asyncScripts = ["analytics.js", "another-script.js"]; // Add more scripts if needed
-  asyncScripts.forEach(scriptSrc => {
-    const script = document.createElement("script");
-    script.src = scriptSrc;
-    script.async = true;
-    document.body.appendChild(script);
-  });
-});
+
 
 // 5. Preloading Resources (Optional, helps preload important resources)
 const preloadResource = (href, type) => {
@@ -647,6 +630,7 @@ const preloadResource = (href, type) => {
 // Example Usage for Preloading
 preloadResource("styles.css", "style");
 preloadResource("script.js", "script");
+      
       
     </script>
 
