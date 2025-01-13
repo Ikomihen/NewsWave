@@ -6,7 +6,7 @@
     <title>NEWS ARCHIVES</title>
     <style>
     
-/* Reset and Base Variables */
+    /* Reset and Base Variables */
 * {
     margin: 0;
     padding: 0;
@@ -220,6 +220,7 @@ body {
     margin-top: auto;
 }
 
+
 /* Loading States */
 .spinner-container {
   position: fixed;
@@ -233,9 +234,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  pointer-events: none; /* Prevent interaction with other elements */
-  opacity: 0;
-  animation: fadeIn 0.3s forwards;
 }
 
 .spinner {
@@ -247,15 +245,8 @@ body {
   animation: spin 1s linear infinite;
 }
 
-/* Spinner Fade-in Animation */
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
+
+
 
 /* Spinner Animation */
 @keyframes spin {
@@ -267,20 +258,6 @@ body {
   }
 }
 
-/* Show the loading spinner when content is loading */
-.loading {
-  display: block;
-}
-
-.loading-more {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 20px;
-  display: block;
-  opacity: 0;
-  animation: fadeIn 0.3s forwards;
-}
 
 /* Animations */
 @keyframes spin {
@@ -300,6 +277,7 @@ body {
     
     .search-button {
         padding: 1.1rem 1.0rem;
+        
     }
     
     .suggestion-tag {
@@ -357,6 +335,7 @@ body {
         background: rgba(0, 0, 0, 0.8);
     }
 }
+    
     </style>
    
 </head>
@@ -396,10 +375,6 @@ body {
         <!-- News content will be loaded here -->
     </main>
 
-    <div class="loading-more" id="loadingMore">
-        <div class="spinner"></div>
-        <p>Loading more news...</p>
-    </div>
 <script>
                   const API_KEYS = [
     "87c6f2d9b7ab49ef9b61dfb4560f9f22",
@@ -435,7 +410,6 @@ function switchApiKey() {
 }
 
 const API_URL = '/api'; // Use relative URL for Netlify proxy
-
 let currentPage = 1;
 let currentCategory = 'general';
 let isLoading = false;
@@ -443,13 +417,46 @@ let debounceTimer;
 
 // Show/hide spinner
 function toggleSpinner(show) {
-    document.getElementById('mainSpinner').style.display = show ? 'block' : 'none';
+    const spinner = document.getElementById('mainSpinner');
+    if (show) {
+        spinner.style.display = 'block';
+        // Disable other interactions while loading
+        document.body.style.pointerEvents = 'none';
+    } else {
+        spinner.style.display = 'none';
+        // Re-enable interactions after loading
+        document.body.style.pointerEvents = 'auto';
+    }
 }
 
-// Show/hide loading more indicator
-function toggleLoadingMore(show) {
-    document.getElementById('loadingMore').style.display = show ? 'block' : 'none';
+// Function to fetch data
+function loadContent() {
+    if (isLoading) return; // Prevent multiple fetches at once
+    
+    isLoading = true;
+    toggleSpinner(true);  // Show spinner
+
+    // Simulate an API call (replace with actual API fetching code)
+    setTimeout(() => {
+        // Replace with actual content loading logic
+        console.log('Loading content for page ' + currentPage);
+
+        // After content is loaded, hide the spinner
+        toggleSpinner(false);  
+        isLoading = false;
+
+        // Increase the page number for the next load
+        currentPage++;
+    }, 2000); // Simulate a 2-second load
 }
+
+// Example of calling loadContent() on scroll or any other trigger
+window.addEventListener('scroll', () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50) {
+        // Load new content when user reaches the bottom
+        loadContent();
+    }
+});
 
 // Fetch news with API key cycling
 async function fetchNews(category = 'general', page = 1, search = '') {
