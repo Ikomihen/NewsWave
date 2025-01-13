@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -251,8 +251,6 @@
         }
     </style>
     
-    
-    
     <style>
       .news-interactions {
     display: flex;
@@ -291,8 +289,9 @@
     list-style: none;
     padding: 0;
 }
-      
     </style>
+    
+    
 </head>
 <body>
     <section class="search-section">
@@ -328,6 +327,7 @@
     
     <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { doc, updateDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
   import { getDatabase } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
   const firebaseConfig = {
@@ -341,112 +341,6 @@
 
   const app = initializeApp(firebaseConfig);
   const database = getDatabase(app);
-  
-  
- function createNewsCard(article) {
-    const articleId = article.title.replace(/\s+/g, '-').toLowerCase(); // Generate unique ID for each article
-    const date = new Date(article.publishedAt);
-    const formattedDate = date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-
-    // Initialize article stats in Firebase if not already done
-    const articleRef = doc(db, "articles", articleId);
-    getDoc(articleRef).then((docSnapshot) => {
-        if (!docSnapshot.exists()) {
-            setDoc(articleRef, {
-                likes: 0,
-                dislikes: 0,
-                views: 0,
-                comments: [],
-                ratings: 0,
-                ratingCount: 0,
-            });
-        }
-    });
-
-    return `
-        <article class="news-card" id="${articleId}">
-            <img src="${article.urlToImage || '/api/placeholder/400/300'}" 
-                 alt="${article.title}" 
-                 class="news-image" 
-                 loading="lazy"
-                 onerror="this.src='/api/placeholder/400/300'">
-            <div class="news-content">
-                <div class="news-tags">
-                    <span class="tag">📅 ${formattedDate}</span>
-                    <span class="tag">📍 ${article.source.name}</span>
-                </div>
-                <h2 class="news-title">${article.title}</h2>
-                <p class="news-excerpt">${article.description || 'Click to read more...'}</p>
-                
-                <!-- Interaction Buttons -->
-                <div class="news-interactions">
-                    <button class="like-button" onclick="handleLike('${articleId}')">👍 <span id="${articleId}-likes">0</span></button>
-                    <button class="dislike-button" onclick="handleDislike('${articleId}')">👎 <span id="${articleId}-dislikes">0</span></button>
-                    <span>👁️ <span id="${articleId}-views">0</span></span>
-                </div>
-                
-                <!-- Rating -->
-                <div class="rating">
-                    <label for="rating-${articleId}">Rate:</label>
-                    <input type="number" id="rating-${articleId}" min="1" max="5" onchange="handleRating('${articleId}', this.value)">
-                    <span>Average: <span id="${articleId}-avg-rating">0</span></span>
-                </div>
-
-                <!-- Comments -->
-                <div class="comments-section">
-                    <input type="text" class="comment-input" placeholder="Add a comment..." 
-                        onkeypress="if(event.key === 'Enter') handleComment('${articleId}', this.value)">
-                    <ul id="${articleId}-comments"></ul>
-                </div>
-            </div>
-        </article>
-    `;
-    
-    async function handleLike(articleId) {
-    const articleRef = doc(db, "articles", articleId);
-    await updateDoc(articleRef, { likes: increment(1) });
-    updateUI(articleId, 'likes');
-}
-
-async function handleDislike(articleId) {
-    const articleRef = doc(db, "articles", articleId);
-    await updateDoc(articleRef, { dislikes: increment(1) });
-    updateUI(articleId, 'dislikes');
-}
-
-async function handleRating(articleId, value) {
-    const articleRef = doc(db, "articles", articleId);
-    const articleSnapshot = await getDoc(articleRef);
-    const { ratings, ratingCount } = articleSnapshot.data();
-    const newRatings = ratings + parseInt(value);
-    const newRatingCount = ratingCount + 1;
-    await updateDoc(articleRef, {
-        ratings: newRatings,
-        ratingCount: newRatingCount,
-    });
-    const avgRating = (newRatings / newRatingCount).toFixed(1);
-    document.getElementById(`${articleId}-avg-rating`).textContent = avgRating;
-}
-
-async function handleComment(articleId, comment) {
-    const articleRef = doc(db, "articles", articleId);
-    await updateDoc(articleRef, { comments: increment(1) });
-    const commentList = document.getElementById(`${articleId}-comments`);
-    commentList.innerHTML += `<li>${comment}</li>`;
-}
-
-async function updateUI(articleId, field) {
-    const articleRef = doc(db, "articles", articleId);
-    const articleSnapshot = await getDoc(articleRef);
-    document.getElementById(`${articleId}-${field}`).textContent = articleSnapshot.data()[field];
-}
-} 
 </script>
     
     
@@ -545,62 +439,172 @@ async function fetchNews(category = 'general', page = 1, search = '') {
 }
 
 // Create news card
-function createNewsCard(article) {
-    const date = new Date(article.publishedAt);
-    const formattedDate = date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-
-    return `
-        <article class="news-card">
-            <img src="${article.urlToImage || '/api/placeholder/400/300'}" 
-                 alt="${article.title}" 
-                 class="news-image" 
-                 loading="lazy"
-                 onerror="this.src='/api/placeholder/400/300'">
-            <div class="news-content">
-                <div class="news-tags">
-                    <span class="tag">📅 ${formattedDate}</span>
-                    <span class="tag">📍 ${article.source.name}</span>
-                </div>
-                <h2 class="news-title">${article.title}</h2>
-                <p class="news-excerpt">${article.description || 'Click to read more...'}</p>
-            </div>
-        </article>
-    `;
-}
+  function createNewsCard(article) {
+      const articleId = article.title.replace(/\s+/g, '-').toLowerCase(); // Generate unique ID for each article
+      const date = new Date(article.publishedAt);
+      const formattedDate = date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+      });
+  
+      // Initialize article stats in Firebase if not already done
+      const articleRef = doc(db, "articles", articleId);
+      getDoc(articleRef).then((docSnapshot) => {
+          if (!docSnapshot.exists()) {
+              setDoc(articleRef, {
+                  likes: 0,
+                  dislikes: 0,
+                  views: 0,
+                  comments: [],
+                  ratings: 0,
+                  ratingCount: 0,
+              });
+          }
+      });
+  
+      return `
+          <article class="news-card" id="${articleId}">
+              <img src="${article.urlToImage || '/api/placeholder/400/300'}" 
+                   alt="${article.title}" 
+                   class="news-image" 
+                   loading="lazy"
+                   onerror="this.src='/api/placeholder/400/300'">
+              <div class="news-content">
+                  <div class="news-tags">
+                      <span class="tag">📅 ${formattedDate}</span>
+                      <span class="tag">📍 ${article.source.name}</span>
+                  </div>
+                  <h2 class="news-title">${article.title}</h2>
+                  <p class="news-excerpt">${article.description || 'Click to read more...'}</p>
+                  
+                  <!-- Interaction Buttons -->
+                  <div class="news-interactions">
+                      <button class="like-button" onclick="handleLike('${articleId}')">👍 <span id="${articleId}-likes">0</span></button>
+                      <button class="dislike-button" onclick="handleDislike('${articleId}')">👎 <span id="${articleId}-dislikes">0</span></button>
+                      <span>👁️ <span id="${articleId}-views">0</span></span>
+                  </div>
+                  
+                  <!-- Rating -->
+                  <div class="rating">
+                      <label for="rating-${articleId}">Rate:</label>
+                      <input type="number" id="rating-${articleId}" min="1" max="5" onchange="handleRating('${articleId}', this.value)">
+                      <span>Average: <span id="${articleId}-avg-rating">0</span></span>
+                  </div>
+  
+                  <!-- Comments -->
+                  <div class="comments-section">
+                      <input type="text" class="comment-input" placeholder="Add a comment..." 
+                          onkeypress="if(event.key === 'Enter') handleComment('${articleId}', this.value)">
+                      <ul id="${articleId}-comments"></ul>
+                  </div>
+              </div>
+          </article>
+      `;
+  }
 
 // Load news with spinner
+
+
+
+// Function to load news articles and handle interactions
 async function loadNews(category = 'general', page = 1, search = '', showSpinner = true) {
     if (showSpinner) toggleSpinner(true);
 
     const articles = await fetchNews(category, page, search);
 
+    const newsContentElement = document.getElementById('newsContent');
+
     if (page === 1) {
-        document.getElementById('newsContent').innerHTML = articles.map(createNewsCard).join('');
+        newsContentElement.innerHTML = articles.map(createNewsCard).join('');
     } else {
-        document.getElementById('newsContent').innerHTML += articles.map(createNewsCard).join('');
+        newsContentElement.innerHTML += articles.map(createNewsCard).join('');
     }
+
+    // Attach event listeners to interactions for each article
+    articles.forEach(article => {
+        const articleId = article.id;
+
+        // Like button event listener
+        document.getElementById(`${articleId}-like`).addEventListener('click', () => handleLike(articleId));
+
+        // Dislike button event listener
+        document.getElementById(`${articleId}-dislike`).addEventListener('click', () => handleDislike(articleId));
+
+        // Rating button event listener
+        document.getElementById(`${articleId}-rating`).addEventListener('click', (event) => {
+            const ratingValue = event.target.value;  // Assuming the rating value is set on the button
+            handleRating(articleId, ratingValue);
+        });
+
+        // Comment submission event listener
+        document.getElementById(`${articleId}-comment-submit`).addEventListener('click', () => {
+            const comment = document.getElementById(`${articleId}-comment-input`).value;
+            handleComment(articleId, comment);
+        });
+    });
 
     if (showSpinner) toggleSpinner(false);
     return articles.length > 0;
 }
 
-// Handle category selection
+// Function to handle category selection
 document.querySelectorAll('.suggestion-tag').forEach(tag => {
     tag.addEventListener('click', async () => {
         document.querySelectorAll('.suggestion-tag').forEach(t => t.classList.remove('active'));
         tag.classList.add('active');
 
-        currentCategory = tag.dataset.category;
-        currentPage = 1;
+        const currentCategory = tag.dataset.category;
+        currentPage = 1;  // Reset page to 1 when a new category is selected
         await loadNews(currentCategory, currentPage);
     });
 });
+
+// Like interaction function
+async function handleLike(articleId) {
+    const articleRef = doc(db, "articles", articleId);
+    await updateDoc(articleRef, { likes: increment(1) });
+    updateUI(articleId, 'likes');
+}
+
+// Dislike interaction function
+async function handleDislike(articleId) {
+    const articleRef = doc(db, "articles", articleId);
+    await updateDoc(articleRef, { dislikes: increment(1) });
+    updateUI(articleId, 'dislikes');
+}
+
+// Rating interaction function
+async function handleRating(articleId, value) {
+    const articleRef = doc(db, "articles", articleId);
+    const articleSnapshot = await getDoc(articleRef);
+    const { ratings, ratingCount } = articleSnapshot.data();
+    const newRatings = ratings + parseInt(value);
+    const newRatingCount = ratingCount + 1;
+    await updateDoc(articleRef, {
+        ratings: newRatings,
+        ratingCount: newRatingCount,
+    });
+    const avgRating = (newRatings / newRatingCount).toFixed(1);
+    document.getElementById(`${articleId}-avg-rating`).textContent = avgRating;
+}
+
+// Comment submission function
+async function handleComment(articleId, comment) {
+    const articleRef = doc(db, "articles", articleId);
+    await updateDoc(articleRef, { comments: increment(1) });
+    const commentList = document.getElementById(`${articleId}-comments`);
+    commentList.innerHTML += `<li>${comment}</li>`;
+}
+
+// Update UI with Firebase data
+async function updateUI(articleId, field) {
+    const articleRef = doc(db, "articles", articleId);
+    const articleSnapshot = await getDoc(articleRef);
+    document.getElementById(`${articleId}-${field}`).textContent = articleSnapshot.data()[field];
+}
 
 // Handle search
 const searchInput = document.querySelector('.search-input');
@@ -657,4 +661,3 @@ loadNews();
 </script>
 </body>
 </html> 
- 
