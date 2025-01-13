@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -245,14 +245,12 @@ body {
   animation: spin 1s linear infinite;
 }
 
-/* Loading More */
-.loading-more {
-  text-align: center;
-  padding: 20px;
-  font-size: 1rem;
-  color: var(--primary);
-  display: none; /* Default hidden */
-}
+
+        .loading-more {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
 
 /* Spinner Animation */
 @keyframes spin {
@@ -343,12 +341,12 @@ body {
 }
     
     </style>
-    
+   
 </head>
 <body>
  
 
-<div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #2f2f2f; border-top: 1px solid #434343; z-index: 1000; padding: 10px; display: flex; justify-content: space-around;">
+<div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color:white; border-top: 1px solid #434343; z-index: 1000; padding: 10px; display: flex; justify-content: space-around;">
 <img src="Home.png" width="24" height="24">
 <img src="page2.png" width="24" height="24">
 <img src="page3.jpg" width="24" height="24">
@@ -584,6 +582,73 @@ window.addEventListener('scroll', debounce(async () => {
 // Initial load
 loadNews();  
 </script>
+ <script>
+      // 1. Lazy Loading Images (No change in src, works with existing structure)
+document.addEventListener("DOMContentLoaded", () => {
+  const images = document.querySelectorAll("img"); // Select all images on the page
+
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        img.src = img.src; // Re-trigger the image load (if src exists)
+        observer.unobserve(img); // Stop observing once the image has been loaded
+      }
+    });
+  });
+
+  images.forEach(img => {
+    observer.observe(img); // Start observing each image
+  });
+});
+
+// 2. Debounced Search Input
+
+ debounce = (callback, delay) => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(callback, delay);
+};
+
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  debounce(() => {
+    performSearch(e.target.value); // Call your search function
+  }, 300); // 300ms delay for search input
+});
+
+
+
+// 3. Service Worker for Caching (Improves performance by caching assets)
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker.js").then(() => {
+    console.log("Service Worker Registered");
+  });
+}
+
+// 4. Asynchronous Script Loading (Ensures non-blocking loading of scripts)
+document.addEventListener("DOMContentLoaded", () => {
+  const asyncScripts = ["analytics.js", "another-script.js"]; // Add more scripts if needed
+  asyncScripts.forEach(scriptSrc => {
+    const script = document.createElement("script");
+    script.src = scriptSrc;
+    script.async = true;
+    document.body.appendChild(script);
+  });
+});
+
+// 5. Preloading Resources (Optional, helps preload important resources)
+const preloadResource = (href, type) => {
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.href = href;
+  link.as = type;
+  document.head.appendChild(link);
+};
+
+// Example Usage for Preloading
+preloadResource("styles.css", "style");
+preloadResource("script.js", "script");
+      
+    </script>
+
 </body>
 </html> 
- 
